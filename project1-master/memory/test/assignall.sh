@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd ../..
-./assignfiletoallvm.py memory/test/testcases/
+python ./assignfiletoallvm.py memory/test/testcases/
