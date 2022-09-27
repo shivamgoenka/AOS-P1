@@ -126,6 +126,8 @@ void MemoryScheduler(virConnectPtr conn, int interval)
 
 	size_t j = 0;
 
+	int noMemRequired = 0;
+
 	for( size_t i = 0; i < numDomains; i++ )
 	{
 		size_t takingVcpu = ( i + firstVcupu ) % numDomains;
@@ -160,7 +162,17 @@ void MemoryScheduler(virConnectPtr conn, int interval)
 					memRequired[ takingVcpu ] -= memTransfered;
 				}
 			}
+			noMemRequired = 1;
 		}
+	}
+
+	if( noMemRequired == 0 )
+	{
+		for( size_t i = 0; i < numDomains; i++ )
+		{
+			if( memSurplus[ i ]  > 0 )
+				virDomainSetMemory( domains[ i ], ( ballonSizes[ i ] - memSurplus[ i ] ) * 1024 );
+		}	
 	}
 
 	firstVcupu = ( firstVcupu + 1 ) % numDomains;
