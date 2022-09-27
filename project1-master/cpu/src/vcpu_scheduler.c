@@ -17,6 +17,7 @@ long long int* currIntVcpuTime = NULL;
 long long int* prevPcpuTime = NULL;
 long long int* prevPcpuFreeTime = NULL;
 double* currIntPcpuUsage = NULL;
+int skip = 1;
 
 
 void CPUScheduler(virConnectPtr conn,int interval);
@@ -168,9 +169,9 @@ void CPUScheduler(virConnectPtr conn, int interval)
 	}
 
 	double stDv = stDev( currIntPcpuUsage, numPcpus );
-	if( stDv <= 5 )
+	if( stDv <= 5 || skip == 1 )
 	{
-		printf( "Load is balanced with a standard Dev of %f\n", stDv );
+		skip = 0;
 	}
 	else
 	{
@@ -193,6 +194,7 @@ void CPUScheduler(virConnectPtr conn, int interval)
 			}
 		}
 		firstPcpu = ( firstPcpu + 1 ) % numPcpus;
+		skip = 1;
 	}
 
 
