@@ -169,7 +169,7 @@ void CPUScheduler(virConnectPtr conn, int interval)
 	}
 
 	double stDv = stDev( currIntPcpuUsage, numPcpus );
-	if( stDv > 5 && prevStd > stDv )
+	if( stDv > 5 && stDv >= prevStd )
 	{
 		sort( domains, currIntVcpuTime, numDomains );
 
