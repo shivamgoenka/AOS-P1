@@ -109,9 +109,9 @@ void MemoryScheduler(virConnectPtr conn, int interval)
 		{
 			// A threshold of 10 mb to clear out noise
 			if( usedMem > prevUsedMem[i] + 10 && unUsedMem < 200  )
-				memRequired[i] = MIN( 50, info->maxMem / 1024 - ballonSize );
+				memRequired[i] = MIN( MAX( 200 - unUsedMem, 50 ), info->maxMem / 1024 - ballonSize );
 
-			else if( usedMem <= prevUsedMem[i] && unUsedMem > 100)
+			else if( usedMem <= prevUsedMem[i] && unUsedMem > 100 )
 			{
 				memSurplus[i] = MIN( 50, unUsedMem - 100 );
 				allVmMaxed = 0;
