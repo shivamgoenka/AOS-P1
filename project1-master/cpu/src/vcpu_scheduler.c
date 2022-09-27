@@ -17,7 +17,7 @@ long long int* currIntVcpuTime = NULL;
 long long int* prevPcpuTime = NULL;
 long long int* prevPcpuFreeTime = NULL;
 double* currIntPcpuUsage = NULL;
-int skip = 1;
+double prevStd = 0;
 
 
 void CPUScheduler(virConnectPtr conn,int interval);
@@ -169,11 +169,7 @@ void CPUScheduler(virConnectPtr conn, int interval)
 	}
 
 	double stDv = stDev( currIntPcpuUsage, numPcpus );
-	if( stDv <= 5 || skip == 1 )
-	{
-		skip = 0;
-	}
-	else
+	if( stDv > 5 && prevStd > stDv )
 	{
 		sort( domains, currIntVcpuTime, numDomains );
 
@@ -194,10 +190,9 @@ void CPUScheduler(virConnectPtr conn, int interval)
 			}
 		}
 		firstPcpu = ( firstPcpu + 1 ) % numPcpus;
-		skip = 1;
 	}
 
-
+	prevStd = stDv;
 
 	for( size_t i = 0; i < numDomains; i++)
 		virDomainFree( domains[ i ] );
