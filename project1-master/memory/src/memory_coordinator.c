@@ -9,7 +9,6 @@
 #define MIN(a,b) ((a)<(b)?a:b)
 #define MAX(a,b) ((a)>(b)?a:b)
 
-long long int* prevUnusedMem = NULL;
 long long int* prevUsedMem = NULL;
 long long int firstVcupu = 0;
 
@@ -60,7 +59,6 @@ int main(int argc, char *argv[])
 
 	// Close the connection
 	virConnectClose(conn);
-	free( prevUnusedMem );
 	free( prevUsedMem );
 	return 0;
 }
@@ -76,11 +74,8 @@ void MemoryScheduler(virConnectPtr conn, int interval)
 
 	int numDomains = virConnectListAllDomains( conn, &domains, VIR_CONNECT_LIST_DOMAINS_RUNNING );
 
-	if( prevUnusedMem == NULL )
-	{
-		prevUnusedMem = calloc( numDomains, sizeof( long long int ) );
+	if( prevUsedMem == NULL )
 		prevUsedMem = calloc( numDomains, sizeof( long long int ) );
-	}
 
 	long long int* ballonSizes = calloc( numDomains, sizeof( long long int ) );
 	long long int* memRequired = calloc( numDomains, sizeof( long long int ) );
@@ -105,7 +100,7 @@ void MemoryScheduler(virConnectPtr conn, int interval)
 
 		usedMem = ballonSize - unUsedMem;
 
-		if( prevUnusedMem[i] != 0 )
+		if( prevUsedMem[i] != 0 )
 		{
 			// A threshold of 10 mb to clear out noise
 			if( usedMem > prevUsedMem[i] + 10 && unUsedMem < 200  )
@@ -119,7 +114,6 @@ void MemoryScheduler(virConnectPtr conn, int interval)
 		}
 
 		ballonSizes[i] = ballonSize;
-		prevUnusedMem[i] = unUsedMem;
 		prevUsedMem[i] = usedMem;
 
 	}
